@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "953437744569",
+    "project_id": "drustvenamreza-13ead",
+    "storage_bucket": "drustvenamreza-13ead.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953437744569:android:63e35eadf1944649499a68",
+        "android_client_info": {
+          "package_name": "ba.sum.fpmoz.drustvenamreza"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3I2sVG9-smk0w4U6QEAe8-pI0kCfP_Rs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
