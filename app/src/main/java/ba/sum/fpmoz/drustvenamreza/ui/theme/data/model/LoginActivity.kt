@@ -5,6 +5,7 @@ import android.content.Intent
 import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -15,6 +16,7 @@ class LoginActivity : AppCompatActivity() {
     private lateinit var loginPasswordTxt: EditText
     private lateinit var loginSubmitBtn: Button
     private lateinit var registerBtn: Button
+    private lateinit var forgotPasswordText: TextView  // Dodano za zaboravljenu lozinku
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,6 +28,7 @@ class LoginActivity : AppCompatActivity() {
         loginPasswordTxt = findViewById(R.id.loginPasswordTxt)
         loginSubmitBtn = findViewById(R.id.loginSubmitBtn)
         registerBtn = findViewById(R.id.registerBtn)
+        forgotPasswordText = findViewById(R.id.textForgotPassword)  // Dodano za zaboravljenu lozinku
 
         loginSubmitBtn.setOnClickListener {
             val email = loginEmailTxt.text.toString()
@@ -54,6 +57,12 @@ class LoginActivity : AppCompatActivity() {
 
         registerBtn.setOnClickListener {
             startActivity(Intent(this, RegisterActivity::class.java))
+        }
+
+        // Klik na "Zaboravljena lozinka?"
+        forgotPasswordText.setOnClickListener {
+            val intent = Intent(this, ForgotPasswordActivity::class.java)
+            startActivity(intent)
         }
     }
 }
