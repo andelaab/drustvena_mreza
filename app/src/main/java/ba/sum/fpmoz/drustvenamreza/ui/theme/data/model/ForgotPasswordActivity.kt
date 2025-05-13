@@ -24,22 +24,26 @@ class ForgotPasswordActivity : AppCompatActivity() {
         resetButton.setOnClickListener {
             val email = emailEditText.text.toString().trim()
 
+            // Provjera da li je email prazan
             if (email.isEmpty()) {
                 Toast.makeText(this, "Unesite email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Provjera valjanosti emaila
             if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 Toast.makeText(this, "Unesite ispravan email", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
+            // Slanje zahtjeva za resetiranje lozinke putem Firebase Auth
             auth.sendPasswordResetEmail(email)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         Toast.makeText(this, "Email za reset lozinke je poslan", Toast.LENGTH_LONG).show()
-                        finish()
+                        finish() // Zatvara ovu aktivnost nakon uspješnog slanja e-maila
                     } else {
+                        // Ispisivanje greške ako slanje nije uspjelo
                         Toast.makeText(this, "Greška: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
