@@ -1,46 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/loginLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center">
+    android:background="@drawable/gradient_background"
+    android:padding="24dp">
 
-    <EditText
-        android:id="@+id/loginEmailTxt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Email"
-        android:inputType="textEmailAddress" />
-
-    <EditText
-        android:id="@+id/loginPasswordTxt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Lozinka"
-        android:inputType="textPassword"/>
-
-    <Button
-        android:id="@+id/loginSubmitBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Prijava"/>
-
-    <Button
-        android:id="@+id/registerBtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Registracija"/>
-
-
+    <!-- Naslov -->
     <TextView
-        android:id="@+id/textForgotPassword"
+        android:id="@+id/loginTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Zaboravljena lozinka?"
-        android:textColor="@android:color/holo_blue_light"
-        android:clickable="true"
-        android:focusable="true"
-        android:gravity="center"/>
-</LinearLayout>
+        android:text="Prijavi se"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="80dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Email -->
+    <EditText
+        android:id="@+id/loginEmailTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/loginTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Lozinka -->
+    <EditText
+        android:id="@+id/loginPasswordTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Lozinka"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/loginEmailTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Gumb za prijavu -->
+    <Button
+        android:id="@+id/loginSubmitBtn"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:text="Prijavi se"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#FF5722"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="24dp"
+        app:layout_constraintTop_toBottomOf="@id/loginPasswordTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Gumb za registraciju -->
+    <Button
+        android:id="@+id/registerBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Nemaš račun? Registriraj se"
+        android:textAllCaps="false"
+        android:textColor="#CCCCCC"
+        android:background="@android:color/transparent"
+        android:fontFamily="sans-serif"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/loginSubmitBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

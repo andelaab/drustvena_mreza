@@ -1,71 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/registerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    android:background="@drawable/gradient_background"
+    android:padding="24dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Space za premještanje sadržaja prema dolje (smanjili smo visinu) -->
+    <Space
+        android:id="@+id/space"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/registerTitle"
+        android:layout_marginTop="60dp"/> <!-- Povećaj ovu marginu ili smanji visinu 'Space' elementa -->
+
+    <!-- Naslov -->
+    <TextView
+        android:id="@+id/registerTitle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="80dp"
+        android:text="Kreiraj račun"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/space" />
 
-        <EditText
-            android:id="@+id/registerNameTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text"
-            android:text="Name" />
+    <!-- Ime i prezime -->
+    <EditText
+        android:id="@+id/registerFullNameTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Ime i prezime"
+        android:inputType="textPersonName"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/registerTitle"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
 
-        <EditText
-            android:id="@+id/registerLastnameTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="text"
-            android:text="Name" />
+    <!-- Email -->
+    <EditText
+        android:id="@+id/registerEmailTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/registerFullNameTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
 
-        <EditText
-            android:id="@+id/registerEmailTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textEmailAddress" />
+    <!-- Lozinka -->
+    <EditText
+        android:id="@+id/registerPasswordTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Lozinka"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/registerEmailTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
-        <EditText
-            android:id="@+id/registerPasswordTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPassword" />
+    <!-- Potvrda lozinke -->
+    <EditText
+        android:id="@+id/registerCnfPasswordTxt"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:hint="Potvrdi lozinku"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:padding="16dp"
+        android:textColorHint="#CCCCCC"
+        android:textColor="#FFFFFF"
+        app:layout_constraintTop_toBottomOf="@id/registerPasswordTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
-        <EditText
-            android:id="@+id/registerCnfPasswordTxt"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPassword" />
+    <!-- Gumb za registraciju -->
+    <Button
+        android:id="@+id/registerSubmitBtn"
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+        android:text="Registriraj se"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#FF5722"
+        android:fontFamily="sans-serif-medium"
+        app:layout_constraintTop_toBottomOf="@id/registerCnfPasswordTxt"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="24dp"/>
 
-        <Button
-            android:id="@+id/registerSubmitBtn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Register" />
+    <!-- Link na login -->
+    <Button
+        android:id="@+id/buttonLoginRedirect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Već imaš račun? Prijavi se"
+        android:textAllCaps="false"
+        android:textColor="#CCCCCC"
+        android:background="@android:color/transparent"
+        android:fontFamily="sans-serif"
+        app:layout_constraintTop_toBottomOf="@id/registerSubmitBtn"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp"/>
 
-        <Button
-            android:id="@+id/buttonLoginRedirect"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Već imate račun? Prijavite se"
-            android:layout_gravity="center"
-            android:layout_marginTop="20dp"/>
-
-    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

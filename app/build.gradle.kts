@@ -28,45 +28,58 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
         viewBinding = true
     }
+
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.3"
     }
 }
 
 dependencies {
+    // AndroidX Core i Lifecycle
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+
+    // Compose
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.ui)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation(libs.firebase.auth)
+    implementation("androidx.compose.runtime:runtime:1.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:2.7.7")
+
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation(libs.firebase.auth)
+
+    // UI podrška
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.lifecycle.livedata.ktx)
-    implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-    implementation("androidx.compose.runtime:runtime:1.5.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation(libs.androidx.activity)
 
+    // Testovi
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
