@@ -1,35 +1,39 @@
 package ba.sum.fpmoz.drustvenamreza
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.firebase.auth.FirebaseAuth
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.PostsFragment
+import ba.sum.fpmoz.drustvenamreza.ProfileFragment
 
 class WelcomeActivity : AppCompatActivity() {
-
-    private lateinit var auth: FirebaseAuth
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_welcome)
 
-        auth = FirebaseAuth.getInstance()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, PostsFragment())
+            .commit()
 
-        val email = intent.getStringExtra("email")
-        val welcomeText = findViewById<TextView>(R.id.welcomeText)
-        val logoutBtn = findViewById<Button>(R.id.logoutBtn)
-
-        welcomeText.text = "Dobrodošli!"
-
-        logoutBtn.setOnClickListener {
-            auth.signOut()
-            Toast.makeText(this, "Odjavljeni ste!", Toast.LENGTH_SHORT).show()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+        bottomNav.setOnItemSelectedListener {
+            when (it.itemId) {
+                R.id.nav_posts -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer, PostsFragment())
+                        .commit()
+                    true
+                }
+                R.id.nav_profile -> {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragmentContainer,
+                            ba.sum.fpmoz.drustvenamreza.ProfileFragment()
+                        )
+                        .commit()
+                    true
+                }
+                else -> false
+            }
         }
     }
 }

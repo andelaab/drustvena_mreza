@@ -62,15 +62,20 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.compose.runtime:runtime:1.5.1")
+    implementation("androidx.compose.runtime:runtime:1.5.3")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
+
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
-    implementation(libs.firebase.auth)
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx") {
+        exclude(group = "com.google.firebase", module = "firebase-common")
+    }
 
     // UI podrška
     implementation(libs.androidx.appcompat)
@@ -78,6 +83,9 @@ dependencies {
     implementation(libs.androidx.annotation)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Testovi
     testImplementation(libs.junit)
