@@ -12,7 +12,20 @@
           "package_name": "ba.sum.fpmoz.drustvenamreza"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "953437744569-cibis0ln3e0615cgbgrig1t8qin2sipd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ba.sum.fpmoz.drustvenamreza",
+            "certificate_hash": "23c77e0d17a7088d35f2425e3fab79f883dd2e28"
+          }
+        },
+        {
+          "client_id": "953437744569-kkntsi64pko5a3rm5i8p3sn7em4vbb0l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyA3I2sVG9-smk0w4U6QEAe8-pI0kCfP_Rs"
@@ -20,7 +33,41 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "953437744569-kkntsi64pko5a3rm5i8p3sn7em4vbb0l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:953437744569:android:6b3bf6723d2e67e4499a68",
+        "android_client_info": {
+          "package_name": "ba.sum.fpmoz.drustvenamreza_"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "953437744569-kkntsi64pko5a3rm5i8p3sn7em4vbb0l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3I2sVG9-smk0w4U6QEAe8-pI0kCfP_Rs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "953437744569-kkntsi64pko5a3rm5i8p3sn7em4vbb0l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

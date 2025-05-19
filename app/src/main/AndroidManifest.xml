@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Potrebna dopuštenja za internet -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -13,18 +17,24 @@
         android:theme="@style/Theme.AppCompat"
         tools:targetApi="31">
 
+        <!-- Aktivnosti -->
         <activity android:name=".EditProfileActivity" android:exported="true" />
         <activity android:name=".ForgotPasswordActivity" android:exported="false" />
         <activity android:name=".LoginActivity" android:exported="false" />
         <activity android:name=".RegisterActivity" android:exported="true" />
 
-        <!-- Ovo je tvoja početna aktivnost -->
+        <!-- Početna aktivnost -->
         <activity android:name=".WelcomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Firebase Auth i Google Sign-In konfiguracija -->
+        <meta-data
+            android:name="com.google.firebase.auth.apiKey"
+            android:value="AIzaSyA3I2sVG9-smk0w4U6QEAe8-pI0kCfP_Rs" />
 
     </application>
 

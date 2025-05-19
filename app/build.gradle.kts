@@ -77,6 +77,9 @@ dependencies {
         exclude(group = "com.google.firebase", module = "firebase-common")
     }
 
+    // Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.0.1") // Dodana ovisnost za Google Sign-In
+
     // UI podrška
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
