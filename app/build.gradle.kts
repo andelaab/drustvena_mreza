@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("kotlin-kapt")
 }
 
 android {
@@ -80,6 +81,10 @@ dependencies {
     // Google Sign-In
     implementation("com.google.android.gms:play-services-auth:20.0.1") // Dodana ovisnost za Google Sign-In
 
+    implementation("com.github.bumptech.glide:glide:4.15.1")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
+
+
     // UI podrška
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
@@ -89,6 +94,7 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
+
 
     // Testovi
     testImplementation(libs.junit)

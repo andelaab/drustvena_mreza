@@ -1,40 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    package="ba.sum.fpmoz.drustvenamreza">
 
-    <!-- Potrebna dopuštenja za internet -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat"
-        tools:targetApi="31">
+        android:theme="@style/Theme.AppCompat">
 
-        <!-- Aktivnosti -->
-        <activity android:name=".EditProfileActivity" android:exported="true" />
+        <activity android:name=".ui.theme.data.AddPostActivity" android:exported="false" />
+        <activity android:name=".EditProfileActivity" android:exported="false" />
         <activity android:name=".ForgotPasswordActivity" android:exported="false" />
         <activity android:name=".LoginActivity" android:exported="false" />
         <activity android:name=".RegisterActivity" android:exported="true" />
-
-        <!-- Početna aktivnost -->
         <activity android:name=".WelcomeActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- Firebase Auth i Google Sign-In konfiguracija -->
-        <meta-data
-            android:name="com.google.firebase.auth.apiKey"
-            android:value="AIzaSyA3I2sVG9-smk0w4U6QEAe8-pI0kCfP_Rs" />
 
     </application>
 
