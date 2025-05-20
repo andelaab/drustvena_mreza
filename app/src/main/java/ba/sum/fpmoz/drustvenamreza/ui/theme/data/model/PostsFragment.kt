@@ -13,6 +13,8 @@ import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
@@ -22,6 +24,8 @@ class PostsFragment : Fragment() {
     private lateinit var adapter: PostsAdapter
     private val postsList = mutableListOf<Post>()
     private val db = FirebaseFirestore.getInstance()
+    private val currentUserId: String?
+        get() = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -31,18 +35,18 @@ class PostsFragment : Fragment() {
         recyclerPosts = view.findViewById(R.id.recyclerPosts)
         recyclerPosts.layoutManager = LinearLayoutManager(requireContext())
 
-        adapter = PostsAdapter(postsList) { post ->
-            followUser(post)
-        }
+        adapter = PostsAdapter(
+            postsList,
+            onFollowClicked = { post -> followUser(post) },
+            onLikeClicked = { post, position -> likePost(post, position) }
+        )
         recyclerPosts.adapter = adapter
 
-        val addPostButton = view.findViewById<Button>(R.id.addPostButton)
-        addPostButton.setOnClickListener {
+        view.findViewById<Button>(R.id.addPostButton).setOnClickListener {
             startActivity(Intent(requireContext(), AddPostActivity::class.java))
         }
 
         loadPosts()
-
         return view
     }
 
@@ -54,15 +58,29 @@ class PostsFragment : Fragment() {
 
                 postsList.clear()
                 snapshot.documents.forEach { doc ->
-                    doc.toObject(Post::class.java)?.let { post ->
-                        postsList.add(post)
-                    }
+                    val post = doc.toObject(Post::class.java)
+                    post?.id = doc.id
+                    post?.let { postsList.add(it) }
                 }
                 adapter.notifyDataSetChanged()
             }
     }
 
+    private fun likePost(post: Post, position: Int) {
+        val userId = currentUserId ?: return
+        val postId = post.id ?: return
+        val postRef = db.collection("posts").document(postId)
+
+        val isLiked = post.likes?.contains(userId) == true
+
+        if (isLiked) {
+            postRef.update("likes", FieldValue.arrayRemove(userId))
+        } else {
+            postRef.update("likes", FieldValue.arrayUnion(userId))
+        }
+    }
+
     private fun followUser(post: Post) {
-        // TODO: implement follow logic
+        // Logika za follow ako zatreba u budućnosti
     }
 }

@@ -7,6 +7,20 @@
     android:padding="24dp"
     android:background="@drawable/gradient_background">
 
+    <!-- Back button -->
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Nazad"
+        android:src="@drawable/ic_arrow_back"
+    app:tint="#FFFFFF"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    android:layout_marginTop="32dp"
+    android:layout_marginStart="0dp"/>
+
     <TextView
         android:id="@+id/addPostTitle"
         android:layout_width="wrap_content"
@@ -16,9 +30,10 @@
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@id/backButton"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="32dp" />
+        android:layout_marginTop="32dp"
+        android:layout_marginStart="8dp" />
 
     <ImageView
         android:id="@+id/imageView"

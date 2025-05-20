@@ -1,8 +1,5 @@
 package ba.sum.fpmoz.drustvenamreza.ui.theme.data
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -13,84 +10,68 @@ import ba.sum.fpmoz.drustvenamreza.R
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import java.util.*
 
 class AddPostActivity : AppCompatActivity() {
 
     private lateinit var imageView: ImageView
-    private lateinit var contentEditText: EditText
+    private lateinit var descriptionEditText: EditText
     private lateinit var addPostBtn: Button
-    private var imageUri: Uri? = null
 
-    private val storageRef = FirebaseStorage.getInstance().reference
-    private val firestore = FirebaseFirestore.getInstance()
-
-    companion object {
-        private const val PICK_IMAGE_REQUEST = 1
-    }
+    private val db = FirebaseFirestore.getInstance()
+    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
 
+        // Postavi toolbar s back buttonom
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.title = "Nova objava"
+
         imageView = findViewById(R.id.imageView)
-        contentEditText = findViewById(R.id.descriptionEditText) // ili zamijeni ID u layoutu
+        descriptionEditText = findViewById(R.id.descriptionEditText)
         addPostBtn = findViewById(R.id.addPostBtn)
 
-        imageView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, PICK_IMAGE_REQUEST)
-        }
+        // Klik na back button toolbar-a
+        // Ovo vraća na prethodni ekran (finish activity)
+        // Na uređaju postoji i hardverski back button
+        // Ovo pokriva toolbar back strelicu
+        // Override onOptionsItemSelected ispod
 
         addPostBtn.setOnClickListener {
-            if (imageUri != null) {
-                uploadImageAndSavePost()
-            } else {
-                savePost(null)
-            }
+            addPost()
         }
     }
 
-    private fun uploadImageAndSavePost() {
-        val fileName = UUID.randomUUID().toString()
-        val imageRef = storageRef.child("post_images/$fileName.jpg")
-
-        imageUri?.let { uri ->
-            imageRef.putFile(uri).addOnSuccessListener {
-                imageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    savePost(downloadUrl.toString())
-                }
-            }.addOnFailureListener {
-                Toast.makeText(this, "Neuspješno slanje slike", Toast.LENGTH_SHORT).show()
-            }
+    private fun addPost() {
+        val description = descriptionEditText.text.toString().trim()
+        if (description.isEmpty()) {
+            Toast.makeText(this, "Unesite opis objave", Toast.LENGTH_SHORT).show()
+            return
         }
-    }
 
-    private fun savePost(imageUrl: String?) {
-        val postMap = hashMapOf(
-            "content" to contentEditText.text.toString(),
+        // Za jednostavnost sada objava bez slike
+        val post = hashMapOf(
+            "content" to description,
             "timestamp" to Timestamp.now(),
-            "imageUrl" to imageUrl
+            "imageUrl" to null,
+            "likes" to hashMapOf<String, Boolean>()
         )
 
-        firestore.collection("posts")
-            .add(postMap)
+        db.collection("posts")
+            .add(post)
             .addOnSuccessListener {
-                Toast.makeText(this, "Objava dodana!", Toast.LENGTH_SHORT).show()
-                finish()
+                Toast.makeText(this, "Objava uspješno dodana", Toast.LENGTH_SHORT).show()
+                finish() // Vrati se na prethodni ekran
             }
             .addOnFailureListener {
-                Toast.makeText(this, "Greška: ${it.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Greška pri dodavanju objave", Toast.LENGTH_SHORT).show()
             }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null) {
-            imageUri = data.data
-            imageView.setImageURI(imageUri)
-        }
+    // Za toolbar back button:
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
     }
 }

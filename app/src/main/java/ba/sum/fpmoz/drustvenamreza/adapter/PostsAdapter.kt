@@ -14,14 +14,17 @@ import java.util.*
 
 class PostsAdapter(
     private val posts: List<Post>,
-    private val onFollowClicked: (Post) -> Unit
+    private val onFollowClicked: (Post) -> Unit,
+    private val onLikeClicked: (Post, Int) -> Unit
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imagePost: ImageView    = itemView.findViewById(R.id.imagePost)
-        val textContent: TextView   = itemView.findViewById(R.id.textDescription)
-        val btnFollow: TextView     = itemView.findViewById(R.id.btnFollow)
+        val imagePost: ImageView = itemView.findViewById(R.id.imagePost)
+        val textContent: TextView = itemView.findViewById(R.id.textDescription)
+        val btnFollow: TextView = itemView.findViewById(R.id.btnFollow)
         val textTimestamp: TextView = itemView.findViewById(R.id.textTimestamp)
+        val textLikes: TextView = itemView.findViewById(R.id.textLikes)
+        val btnLike: ImageView = itemView.findViewById(R.id.btnLike)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -33,22 +36,19 @@ class PostsAdapter(
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = posts[position]
 
-        // Prikaz sadržaja objave
         holder.textContent.text = post.content
 
-        // Obrada timestamp polja koje može biti Long ili Firebase Timestamp
         val rawTs = post.timestamp
         val date: Date? = when (rawTs) {
             is com.google.firebase.Timestamp -> rawTs.toDate()
-            is Long                         -> Date(rawTs)
-            else                            -> null
+            is Long -> Date(rawTs)
+            else -> null
         }
         holder.textTimestamp.text = date?.let {
             val sdf = SimpleDateFormat("dd.MM.yyyy. HH:mm", Locale.getDefault())
             sdf.format(it)
         } ?: "Nema datuma"
 
-        // Prikaz slike samo ako postoji URL, inače sakrij ImageView
         if (!post.imageUrl.isNullOrBlank()) {
             holder.imagePost.visibility = View.VISIBLE
             Glide.with(holder.itemView.context)
@@ -58,8 +58,18 @@ class PostsAdapter(
             holder.imagePost.visibility = View.GONE
         }
 
-        // Rukovanje klikom na Follow
-        holder.btnFollow.setOnClickListener { onFollowClicked(post) }
+        // Likes count
+        val likesCount = post.likes?.size ?: 0
+        holder.textLikes.text = "Lajkova: $likesCount"
+
+        // Promjena ikone lajka (ako želiš možeš dodati logiku za lajkanje korisnika)
+        holder.btnLike.setOnClickListener {
+            onLikeClicked(post, position)
+        }
+
+        holder.btnFollow.setOnClickListener {
+            onFollowClicked(post)
+        }
     }
 
     override fun getItemCount(): Int = posts.size

@@ -27,7 +27,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Novi TextView za prikaz datuma -->
     <TextView
         android:id="@+id/textTimestamp"
         android:layout_width="wrap_content"
