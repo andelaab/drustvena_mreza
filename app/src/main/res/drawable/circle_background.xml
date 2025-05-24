@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-    <solid android:color="@android:color/white" />
-    <stroke
-        android:width="2dp"
-        android:color="#FF5722" />
-</shape>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shadow ili tamnija pozadina iza slike -->
+    <item>
+        <shape android:shape="oval">
+            <solid android:color="#22000000" />
+            <size android:width="110dp" android:height="110dp" />
+        </shape>
+    </item>
+
+    <!-- Glavni bijeli krug s narančastim rubom -->
+    <item android:left="5dp" android:top="5dp">
+        <shape android:shape="oval">
+            <solid android:color="@android:color/white" />
+            <stroke
+                android:width="2dp"
+                android:color="#FF5722" />
+        </shape>
+    </item>
+
+</layer-list>

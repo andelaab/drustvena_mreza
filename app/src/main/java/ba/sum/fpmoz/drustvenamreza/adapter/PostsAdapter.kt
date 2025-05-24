@@ -6,70 +6,52 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.model.Post
-import com.bumptech.glide.Glide
-import java.text.SimpleDateFormat
-import java.util.*
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 class PostsAdapter(
     private val posts: List<Post>,
-    private val onFollowClicked: (Post) -> Unit,
-    private val onLikeClicked: (Post, Int) -> Unit
+    private val onLikeClicked: (Post) -> Unit,
+    private val onCommentClicked: (Post) -> Unit
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
+    private val auth = FirebaseAuth.getInstance()
+
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imagePost: ImageView = itemView.findViewById(R.id.imagePost)
-        val textContent: TextView = itemView.findViewById(R.id.textDescription)
-        val btnFollow: TextView = itemView.findViewById(R.id.btnFollow)
-        val textTimestamp: TextView = itemView.findViewById(R.id.textTimestamp)
-        val textLikes: TextView = itemView.findViewById(R.id.textLikes)
-        val btnLike: ImageView = itemView.findViewById(R.id.btnLike)
+        val imageView: ImageView = itemView.findViewById(R.id.postImage)
+        val usernameTextView: TextView = itemView.findViewById(R.id.username)
+        val likeIcon: ImageView = itemView.findViewById(R.id.likeIcon)
+        val likeCountText: TextView = itemView.findViewById(R.id.likeCount)
+        val commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
+        val commentCountText: TextView = itemView.findViewById(R.id.commentCount)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_post, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_post, parent, false)
         return PostViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = posts[position]
 
-        holder.textContent.text = post.content
+        holder.usernameTextView.text = post.userName
+        holder.likeCountText.text = "Lajkova: ${post.likes?.size ?: 0}"
+        holder.commentCountText.text = "Komentara: ${post.commentCount ?: 0}"
 
-        val rawTs = post.timestamp
-        val date: Date? = when (rawTs) {
-            is com.google.firebase.Timestamp -> rawTs.toDate()
-            is Long -> Date(rawTs)
-            else -> null
-        }
-        holder.textTimestamp.text = date?.let {
-            val sdf = SimpleDateFormat("dd.MM.yyyy. HH:mm", Locale.getDefault())
-            sdf.format(it)
-        } ?: "Nema datuma"
+        Glide.with(holder.imageView.context)
+            .load(post.imageUrl ?: R.drawable.placeholder)
+            .into(holder.imageView)
 
-        if (!post.imageUrl.isNullOrBlank()) {
-            holder.imagePost.visibility = View.VISIBLE
-            Glide.with(holder.itemView.context)
-                .load(post.imageUrl)
-                .into(holder.imagePost)
-        } else {
-            holder.imagePost.visibility = View.GONE
-        }
+        val currentUser = auth.currentUser?.uid
+        val isLiked = post.likes?.containsKey(currentUser) == true
 
-        // Likes count
-        val likesCount = post.likes?.size ?: 0
-        holder.textLikes.text = "Lajkova: $likesCount"
+        holder.likeIcon.setImageResource(if (isLiked) R.drawable.ic_like else R.drawable.ic_like_outline)
 
-        // Promjena ikone lajka (ako želiš možeš dodati logiku za lajkanje korisnika)
-        holder.btnLike.setOnClickListener {
-            onLikeClicked(post, position)
-        }
-
-        holder.btnFollow.setOnClickListener {
-            onFollowClicked(post)
-        }
+        holder.likeIcon.setOnClickListener { onLikeClicked(post) }
+        holder.commentIcon.setOnClickListener { onCommentClicked(post) }
     }
 
     override fun getItemCount(): Int = posts.size

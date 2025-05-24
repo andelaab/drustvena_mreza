@@ -32,9 +32,11 @@ class ProfileFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
+        // Firebase inicijalizacija
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        // Povezivanje s XML elementima
         profileImageView = view.findViewById(R.id.profileImageView)
         emailText = view.findViewById(R.id.profileEmail)
         fullNameText = view.findViewById(R.id.profileFullName)
@@ -42,10 +44,10 @@ class ProfileFragment : Fragment() {
         interestsText = view.findViewById(R.id.profileInterests)
         likesCountText = view.findViewById(R.id.likesCountText)
         commentsCountText = view.findViewById(R.id.commentsCountText)
-
         editProfileBtn = view.findViewById(R.id.btnEditProfile)
         logoutBtn = view.findViewById(R.id.btnLogout)
 
+        // Dohvaćanje podataka korisnika
         val user = auth.currentUser
         if (user != null) {
             emailText.text = user.email
@@ -58,15 +60,22 @@ class ProfileFragment : Fragment() {
                         interestsText.text = document.getString("interests") ?: "Nema interesa"
                         likesCountText.text = "Lajkova: ${document.getLong("likesCount") ?: 0}"
                         commentsCountText.text = "Komentara: ${document.getLong("commentsCount") ?: 0}"
+                    } else {
+                        Toast.makeText(requireContext(), "Korisnički podaci nisu pronađeni.", Toast.LENGTH_SHORT).show()
                     }
+                }
+                .addOnFailureListener { exception ->
+                    Toast.makeText(requireContext(), "Greška: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
         }
 
+        // Uredi profil
         editProfileBtn.setOnClickListener {
             val intent = Intent(requireContext(), EditProfileActivity::class.java)
             startActivity(intent)
         }
 
+        // Odjava
         logoutBtn.setOnClickListener {
             auth.signOut()
             startActivity(Intent(requireContext(), LoginActivity::class.java))

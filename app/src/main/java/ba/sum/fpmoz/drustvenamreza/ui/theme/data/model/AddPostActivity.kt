@@ -24,7 +24,6 @@ class AddPostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_post)
 
-        // Postavi toolbar s back buttonom
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.title = "Nova objava"
 
@@ -32,15 +31,12 @@ class AddPostActivity : AppCompatActivity() {
         descriptionEditText = findViewById(R.id.descriptionEditText)
         addPostBtn = findViewById(R.id.addPostBtn)
 
-        // Klik na back button toolbar-a
-        // Ovo vraća na prethodni ekran (finish activity)
-        // Na uređaju postoji i hardverski back button
-        // Ovo pokriva toolbar back strelicu
-        // Override onOptionsItemSelected ispod
-
         addPostBtn.setOnClickListener {
             addPost()
         }
+
+        // POZOVI OVDJE AKO ŽELIŠ IZVRŠITI KONVERZIJU (SAMO JEDNOM!)
+        // convertLikesToList()
     }
 
     private fun addPost() {
@@ -50,28 +46,53 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
-        // Za jednostavnost sada objava bez slike
         val post = hashMapOf(
             "content" to description,
             "timestamp" to Timestamp.now(),
             "imageUrl" to null,
-            "likes" to hashMapOf<String, Boolean>()
+            "likes" to arrayListOf<String>() // ✅ prazni niz lajkova
         )
 
         db.collection("posts")
             .add(post)
             .addOnSuccessListener {
                 Toast.makeText(this, "Objava uspješno dodana", Toast.LENGTH_SHORT).show()
-                finish() // Vrati se na prethodni ekran
+                finish()
             }
             .addOnFailureListener {
                 Toast.makeText(this, "Greška pri dodavanju objave", Toast.LENGTH_SHORT).show()
             }
     }
 
-    // Za toolbar back button:
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    // ✅ FUNKCIJA ZA KONVERZIJU - unutar klase, ali izvan metoda
+    private fun convertLikesToList() {
+        db.collection("posts")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                for (document in snapshot.documents) {
+                    val likesMap = document.get("likes") as? Map<String, Boolean>
+                    if (likesMap != null) {
+                        val likesList = likesMap.filterValues { it }.keys.toList()
+
+                        db.collection("posts")
+                            .document(document.id)
+                            .update("likes", likesList)
+                            .addOnSuccessListener {
+                                println("Likes za post ${document.id} uspješno konvertirani.")
+                            }
+                            .addOnFailureListener { e ->
+                                println("Greška pri konverziji posta ${document.id}: ${e.message}")
+                            }
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                println("Greška pri dohvaćanju postova: ${e.message}")
+            }
     }
 }
