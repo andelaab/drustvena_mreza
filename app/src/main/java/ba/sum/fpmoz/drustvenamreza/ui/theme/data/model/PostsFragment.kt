@@ -32,7 +32,8 @@ class PostsFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerPosts)
 
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = PostsAdapter(postsList,
+        adapter = PostsAdapter(
+            postsList,
             onLikeClicked = { post -> toggleLike(post) },
             onCommentClicked = { post -> openComments(post) }
         )
@@ -52,9 +53,21 @@ class PostsFragment : Fragment() {
                 if (snapshot != null) {
                     postsList.clear()
                     for (doc in snapshot.documents) {
-                        val post = doc.toObject(Post::class.java)
-                        if (post != null) {
-                            postsList.add(post.copy(id = doc.id))
+                        val likesField = doc.get("likes")
+
+                        // Provjeri da je 'likes' polje Map (ili null)
+                        if (likesField == null || likesField is Map<*, *>) {
+                            try {
+                                val post = doc.toObject(Post::class.java)
+                                if (post != null) {
+                                    postsList.add(post.copy(id = doc.id))
+                                }
+                            } catch (e: Exception) {
+                                // Preskoči ako dođe do greške u deserializaciji
+                                e.printStackTrace()
+                            }
+                        } else {
+                            // Preskoči dokument s pogrešnim tipom likes
                         }
                     }
                     adapter.notifyDataSetChanged()
@@ -65,15 +78,17 @@ class PostsFragment : Fragment() {
     private fun toggleLike(post: Post) {
         val docRef = firestore.collection("posts").document(post.id ?: return)
         val likes = post.likes?.toMutableMap() ?: mutableMapOf()
+
         if (likes.containsKey(currentUserId)) {
             likes.remove(currentUserId)
         } else {
             likes[currentUserId] = true
         }
+
         docRef.update("likes", likes)
     }
 
     private fun openComments(post: Post) {
-        // Dodaj navigaciju prema komentarskom fragmentu ili aktivnosti
+        // Ovdje dodaj navigaciju prema fragmentu/aktivnosti za komentare
     }
 }
