@@ -13,6 +13,10 @@ import com.google.firebase.firestore.Query
 import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
+import android.content.Intent
+
+
 
 class PostsFragment : Fragment() {
 
@@ -38,6 +42,15 @@ class PostsFragment : Fragment() {
             onCommentClicked = { post -> openComments(post) }
         )
         recyclerView.adapter = adapter
+
+        val addPostButton = view.findViewById<View>(R.id.addPostButton)
+        addPostButton.setOnClickListener {
+            // Ovdje pokreni AddPost aktivnost ili navigaciju prema fragmentu
+            // Ako imaš AddPostActivity:
+            val intent = Intent(requireContext(), AddPostActivity::class.java)
+            startActivity(intent)
+        }
+
 
         loadPosts()
 

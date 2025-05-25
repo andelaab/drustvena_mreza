@@ -50,7 +50,8 @@ class AddPostActivity : AppCompatActivity() {
             "content" to description,
             "timestamp" to Timestamp.now(),
             "imageUrl" to null,
-            "likes" to arrayListOf<String>() // ✅ prazni niz lajkova
+            "likes" to hashMapOf<String, Boolean>()
+            // ✅ prazni niz lajkova
         )
 
         db.collection("posts")

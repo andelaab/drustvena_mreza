@@ -69,21 +69,18 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.7")
 
-
-    // Firebase
+    // Firebase (via BoM - koristi jedinstvenu verziju za sve module)
     implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-storage-ktx")
-    implementation("com.google.firebase:firebase-firestore-ktx") {
-        exclude(group = "com.google.firebase", module = "firebase-common")
-    }
 
     // Google Sign-In
-    implementation("com.google.android.gms:play-services-auth:20.0.1") // Dodana ovisnost za Google Sign-In
+    implementation("com.google.android.gms:play-services-auth:20.0.1")
 
+    // Glide za učitavanje slika
     implementation("com.github.bumptech.glide:glide:4.15.1")
     kapt("com.github.bumptech.glide:compiler:4.15.1")
-
 
     // UI podrška
     implementation(libs.androidx.appcompat)
@@ -94,7 +91,6 @@ dependencies {
     implementation(libs.androidx.credentials)
     implementation(libs.androidx.credentials.play.services.auth)
     implementation(libs.googleid)
-
 
     // Testovi
     testImplementation(libs.junit)
