@@ -1,5 +1,7 @@
 package ba.sum.fpmoz.drustvenamreza.ui.theme.data
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
@@ -10,6 +12,7 @@ import ba.sum.fpmoz.drustvenamreza.R
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
 class AddPostActivity : AppCompatActivity() {
 
@@ -18,7 +21,12 @@ class AddPostActivity : AppCompatActivity() {
     private lateinit var addPostBtn: Button
 
     private val db = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
     private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+
+    private var selectedImageUri: Uri? = null
+
+    private val PICK_IMAGE_REQUEST = 1001
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,12 +39,29 @@ class AddPostActivity : AppCompatActivity() {
         descriptionEditText = findViewById(R.id.descriptionEditText)
         addPostBtn = findViewById(R.id.addPostBtn)
 
+        imageView.setOnClickListener {
+            openGallery()
+        }
+
         addPostBtn.setOnClickListener {
             addPost()
         }
+    }
 
-        // POZOVI OVDJE AKO ŽELIŠ IZVRŠITI KONVERZIJU (SAMO JEDNOM!)
-        // convertLikesToList()
+    private fun openGallery() {
+        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        intent.type = "image/*"
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
+            data?.data?.let { uri ->
+                selectedImageUri = uri
+                imageView.setImageURI(uri)
+            }
+        }
     }
 
     private fun addPost() {
@@ -46,15 +71,40 @@ class AddPostActivity : AppCompatActivity() {
             return
         }
 
+        if (selectedImageUri != null) {
+            uploadImageToFirebase(selectedImageUri!!) { imageUrl ->
+                savePostToFirestore(description, imageUrl)
+            }
+        } else {
+            // Ako nema slike, spremi post bez slike
+            savePostToFirestore(description, null)
+        }
+    }
+
+    private fun uploadImageToFirebase(uri: Uri, onSuccess: (String) -> Unit) {
+        val storageRef = storage.reference
+        val imageRef = storageRef.child("post_images/${System.currentTimeMillis()}.jpg")
+
+        imageRef.putFile(uri)
+            .addOnSuccessListener {
+                imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                    onSuccess(downloadUri.toString())
+                }
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Greška pri uploadu slike", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun savePostToFirestore(description: String, imageUrl: String?) {
         val post = hashMapOf(
             "content" to description,
             "timestamp" to Timestamp.now(),
-            "imageUrl" to null,
+            "imageUrl" to imageUrl,
             "likes" to hashMapOf<String, Boolean>()
-            // ✅ prazni niz lajkova
         )
 
-        db.collection("posts")
+        db.collection("pogit addsts")
             .add(post)
             .addOnSuccessListener {
                 Toast.makeText(this, "Objava uspješno dodana", Toast.LENGTH_SHORT).show()
@@ -68,32 +118,5 @@ class AddPostActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
-    }
-
-    // ✅ FUNKCIJA ZA KONVERZIJU - unutar klase, ali izvan metoda
-    private fun convertLikesToList() {
-        db.collection("posts")
-            .get()
-            .addOnSuccessListener { snapshot ->
-                for (document in snapshot.documents) {
-                    val likesMap = document.get("likes") as? Map<String, Boolean>
-                    if (likesMap != null) {
-                        val likesList = likesMap.filterValues { it }.keys.toList()
-
-                        db.collection("posts")
-                            .document(document.id)
-                            .update("likes", likesList)
-                            .addOnSuccessListener {
-                                println("Likes za post ${document.id} uspješno konvertirani.")
-                            }
-                            .addOnFailureListener { e ->
-                                println("Greška pri konverziji posta ${document.id}: ${e.message}")
-                            }
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                println("Greška pri dohvaćanju postova: ${e.message}")
-            }
     }
 }

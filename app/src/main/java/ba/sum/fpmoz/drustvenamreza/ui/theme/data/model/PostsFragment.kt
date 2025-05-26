@@ -1,5 +1,6 @@
 package ba.sum.fpmoz.drustvenamreza.ui.theme.data.model
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,16 +8,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import ba.sum.fpmoz.drustvenamreza.R
+import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
+import ba.sum.fpmoz.drustvenamreza.model.Post
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import ba.sum.fpmoz.drustvenamreza.R
-import ba.sum.fpmoz.drustvenamreza.model.Post
-import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
-import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
-import android.content.Intent
-
-
+import com.google.firebase.firestore.SetOptions
 
 class PostsFragment : Fragment() {
 
@@ -45,12 +45,9 @@ class PostsFragment : Fragment() {
 
         val addPostButton = view.findViewById<View>(R.id.addPostButton)
         addPostButton.setOnClickListener {
-            // Ovdje pokreni AddPost aktivnost ili navigaciju prema fragmentu
-            // Ako imaš AddPostActivity:
             val intent = Intent(requireContext(), AddPostActivity::class.java)
             startActivity(intent)
         }
-
 
         loadPosts()
 
@@ -68,7 +65,6 @@ class PostsFragment : Fragment() {
                     for (doc in snapshot.documents) {
                         val likesField = doc.get("likes")
 
-                        // Provjeri da je 'likes' polje Map (ili null)
                         if (likesField == null || likesField is Map<*, *>) {
                             try {
                                 val post = doc.toObject(Post::class.java)
@@ -76,11 +72,8 @@ class PostsFragment : Fragment() {
                                     postsList.add(post.copy(id = doc.id))
                                 }
                             } catch (e: Exception) {
-                                // Preskoči ako dođe do greške u deserializaciji
                                 e.printStackTrace()
                             }
-                        } else {
-                            // Preskoči dokument s pogrešnim tipom likes
                         }
                     }
                     adapter.notifyDataSetChanged()
@@ -98,10 +91,53 @@ class PostsFragment : Fragment() {
             likes[currentUserId] = true
         }
 
-        docRef.update("likes", likes)
+        if (likes.isEmpty()) {
+            // Ako nema lajkova, izbriši polje 'likes'
+            docRef.update("likes", FieldValue.delete())
+                .addOnSuccessListener {
+                    println("Likes polje obrisano (jer je prazno).")
+                    updateLocalPostLikes(post, null)
+                }
+                .addOnFailureListener { e ->
+                    println("Greška pri brisanju likes polja: ${e.message}")
+                }
+        } else {
+            // Filtriraj da nema praznih ili nevalidnih ključeva
+            val filteredLikes = likes.filterKeys { it.isNotBlank() && it != "null" }
+
+            if (filteredLikes.isNotEmpty()) {
+                docRef.set(mapOf("likes" to filteredLikes), SetOptions.merge())
+                    .addOnSuccessListener {
+                        println("Likes polje uspješno ažurirano.")
+                        updateLocalPostLikes(post, filteredLikes)
+                    }
+                    .addOnFailureListener { e ->
+                        println("Greška pri ažuriranju likes polja: ${e.message}")
+                    }
+            } else {
+                // Ako nema validnih ključeva, briši polje likes
+                docRef.update("likes", FieldValue.delete())
+                    .addOnSuccessListener {
+                        println("Likes polje obrisano jer nema validnih korisnika.")
+                        updateLocalPostLikes(post, null)
+                    }
+                    .addOnFailureListener { e ->
+                        println("Greška pri brisanju likes polja: ${e.message}")
+                    }
+            }
+        }
+    }
+
+    private fun updateLocalPostLikes(post: Post, updatedLikes: Map<String, Boolean>?) {
+        val index = postsList.indexOfFirst { it.id == post.id }
+        if (index != -1) {
+            val updatedPost = post.copy(likes = updatedLikes)
+            postsList[index] = updatedPost
+            adapter.notifyItemChanged(index)
+        }
     }
 
     private fun openComments(post: Post) {
-        // Ovdje dodaj navigaciju prema fragmentu/aktivnosti za komentare
+        // TODO: implementiraj otvaranje komentara
     }
 }
