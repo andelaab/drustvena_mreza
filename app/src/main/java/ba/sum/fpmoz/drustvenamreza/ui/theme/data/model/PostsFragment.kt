@@ -12,12 +12,12 @@ import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.CommentsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
-
 
 class PostsFragment : Fragment() {
 
@@ -93,7 +93,6 @@ class PostsFragment : Fragment() {
         }
 
         if (likes.isEmpty()) {
-            // Ako nema lajkova, izbriši polje 'likes'
             docRef.update("likes", FieldValue.delete())
                 .addOnSuccessListener {
                     println("Likes polje obrisano (jer je prazno).")
@@ -103,7 +102,6 @@ class PostsFragment : Fragment() {
                     println("Greška pri brisanju likes polja: ${e.message}")
                 }
         } else {
-            // Filtriraj da nema praznih ili nevalidnih ključeva
             val filteredLikes = likes.filterKeys { it.isNotBlank() && it != "null" }
 
             if (filteredLikes.isNotEmpty()) {
@@ -116,7 +114,6 @@ class PostsFragment : Fragment() {
                         println("Greška pri ažuriranju likes polja: ${e.message}")
                     }
             } else {
-                // Ako nema validnih ključeva, briši polje likes
                 docRef.update("likes", FieldValue.delete())
                     .addOnSuccessListener {
                         println("Likes polje obrisano jer nema validnih korisnika.")
@@ -139,6 +136,8 @@ class PostsFragment : Fragment() {
     }
 
     private fun openComments(post: Post) {
-        // TODO: implementiraj otvaranje komentara
+        val intent = Intent(requireContext(), CommentsActivity::class.java)
+        intent.putExtra("postId", post.id)
+        startActivity(intent)
     }
 }
