@@ -18,6 +18,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
 
+
 class PostsFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView

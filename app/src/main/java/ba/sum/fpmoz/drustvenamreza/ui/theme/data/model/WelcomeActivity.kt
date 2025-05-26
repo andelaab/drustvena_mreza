@@ -1,10 +1,10 @@
 package ba.sum.fpmoz.drustvenamreza
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.PostsFragment
-import ba.sum.fpmoz.drustvenamreza.ProfileFragment
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class WelcomeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,10 +26,12 @@ class WelcomeActivity : AppCompatActivity() {
                 }
                 R.id.nav_profile -> {
                     supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragmentContainer,
-                            ba.sum.fpmoz.drustvenamreza.ProfileFragment()
-                        )
+                        .replace(R.id.fragmentContainer, ProfileFragment())
                         .commit()
+                    true
+                }
+                R.id.nav_search -> {
+                    startActivity(Intent(this, SearchActivity::class.java))
                     true
                 }
                 else -> false
