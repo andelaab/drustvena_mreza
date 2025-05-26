@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:hint="Ime"
             android:inputType="textPersonName"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="24dp" />
 
         <EditText
             android:id="@+id/editTextLastName"
@@ -24,13 +24,21 @@
             android:layout_height="wrap_content"
             android:hint="Prezime"
             android:inputType="textPersonName"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="24dp" />
 
         <EditText
             android:id="@+id/editTextInterests"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Interesi"
+            android:inputType="text"
+            android:layout_marginBottom="24dp" />
+
+        <EditText
+            android:id="@+id/editTextBio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Biografija"
             android:inputType="text"
             android:layout_marginBottom="24dp" />
 

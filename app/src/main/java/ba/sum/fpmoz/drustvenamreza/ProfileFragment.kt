@@ -32,11 +32,11 @@ class ProfileFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        // Firebase inicijalizacija
+        // Inicijalizacija Firebase-a
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Povezivanje s XML elementima
+        // Povezivanje UI elemenata
         profileImageView = view.findViewById(R.id.profileImageView)
         emailText = view.findViewById(R.id.profileEmail)
         fullNameText = view.findViewById(R.id.profileFullName)
@@ -47,7 +47,32 @@ class ProfileFragment : Fragment() {
         editProfileBtn = view.findViewById(R.id.btnEditProfile)
         logoutBtn = view.findViewById(R.id.btnLogout)
 
-        // Dohvaćanje podataka korisnika
+        // Učitavanje podataka korisnika
+        loadUserData()
+
+        // Listener za uređivanje profila
+        editProfileBtn.setOnClickListener {
+            val intent = Intent(requireContext(), EditProfileActivity::class.java)
+            startActivity(intent)
+        }
+
+        // Listener za odjavu
+        logoutBtn.setOnClickListener {
+            auth.signOut()
+            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            requireActivity().finish()
+        }
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Osvježavanje podataka korisnika nakon povratka
+        loadUserData()
+    }
+
+    private fun loadUserData() {
         val user = auth.currentUser
         if (user != null) {
             emailText.text = user.email
@@ -68,20 +93,5 @@ class ProfileFragment : Fragment() {
                     Toast.makeText(requireContext(), "Greška: ${exception.message}", Toast.LENGTH_SHORT).show()
                 }
         }
-
-        // Uredi profil
-        editProfileBtn.setOnClickListener {
-            val intent = Intent(requireContext(), EditProfileActivity::class.java)
-            startActivity(intent)
-        }
-
-        // Odjava
-        logoutBtn.setOnClickListener {
-            auth.signOut()
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
-            requireActivity().finish()
-        }
-
-        return view
     }
 }
