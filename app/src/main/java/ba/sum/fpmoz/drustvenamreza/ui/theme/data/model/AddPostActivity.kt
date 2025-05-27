@@ -10,9 +10,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import ba.sum.fpmoz.drustvenamreza.R
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
+import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONObject
+import java.io.IOException
 
 class AddPostActivity : AppCompatActivity() {
 
@@ -21,12 +24,14 @@ class AddPostActivity : AppCompatActivity() {
     private lateinit var addPostBtn: Button
 
     private val db = FirebaseFirestore.getInstance()
-    private val storage = FirebaseStorage.getInstance()
-    private val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-
     private var selectedImageUri: Uri? = null
 
     private val PICK_IMAGE_REQUEST = 1001
+
+    // OVDJE STAVI SVOJ ImageKit public API key
+    private val imageKitPrivateKey = "private_iXm5gCe9WCLcnqWkMMIyRbo4usw="
+
+    private val client = OkHttpClient()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,29 +77,75 @@ class AddPostActivity : AppCompatActivity() {
         }
 
         if (selectedImageUri != null) {
-            uploadImageToFirebase(selectedImageUri!!) { imageUrl ->
+            uploadImageToImageKit(selectedImageUri!!) { imageUrl ->
                 savePostToFirestore(description, imageUrl)
             }
         } else {
-            // Ako nema slike, spremi post bez slike
             savePostToFirestore(description, null)
         }
     }
 
-    private fun uploadImageToFirebase(uri: Uri, onSuccess: (String) -> Unit) {
-        val storageRef = storage.reference
-        val imageRef = storageRef.child("post_images/${System.currentTimeMillis()}.jpg")
+    private fun uploadImageToImageKit(uri: Uri, onSuccess: (String) -> Unit) {
+        val uploadUrl = "https://upload.imagekit.io/api/v1/files/upload"
 
-        imageRef.putFile(uri)
-            .addOnSuccessListener {
-                imageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                    onSuccess(downloadUri.toString())
+        val inputStream = contentResolver.openInputStream(uri)
+        val imageBytes = inputStream?.readBytes()
+        inputStream?.close()
+
+        if (imageBytes == null) {
+            runOnUiThread {
+                Toast.makeText(this, "Greška kod čitanja slike", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+        val requestBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("file", "image.jpg", imageBytes.toRequestBody("image/*".toMediaTypeOrNull()))
+            .addFormDataPart("fileName", "post_${System.currentTimeMillis()}.jpg")
+            .build()
+
+        val credential = Credentials.basic(imageKitPrivateKey, "") // Basic Auth zaglavlje
+
+        val request = Request.Builder()
+            .url(uploadUrl)
+            .addHeader("Authorization", credential)
+            .post(requestBody)
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                runOnUiThread {
+                    Toast.makeText(this@AddPostActivity, "Neuspješan upload slike", Toast.LENGTH_SHORT).show()
                 }
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Greška pri uploadu slike", Toast.LENGTH_SHORT).show()
+
+            override fun onResponse(call: Call, response: Response) {
+                val responseBody = response.body?.string()
+                response.body?.close()
+
+                if (!response.isSuccessful) {
+                    runOnUiThread {
+                        Toast.makeText(this@AddPostActivity, "Greška pri uploadu slike", Toast.LENGTH_SHORT).show()
+                    }
+                    return
+                }
+
+                try {
+                    val json = JSONObject(responseBody ?: "")
+                    val imageUrl = json.getString("url")
+                    runOnUiThread {
+                        onSuccess(imageUrl)
+                    }
+                } catch (e: Exception) {
+                    runOnUiThread {
+                        Toast.makeText(this@AddPostActivity, "Greška u odgovoru servera", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
+        })
     }
+
 
     private fun savePostToFirestore(description: String, imageUrl: String?) {
         val post = hashMapOf(
@@ -104,7 +155,7 @@ class AddPostActivity : AppCompatActivity() {
             "likes" to hashMapOf<String, Boolean>()
         )
 
-        db.collection("pogit addsts")
+        db.collection("posts")  // preporučujem "posts" a ne "pogit addsts"
             .add(post)
             .addOnSuccessListener {
                 Toast.makeText(this, "Objava uspješno dodana", Toast.LENGTH_SHORT).show()

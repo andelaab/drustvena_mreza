@@ -100,4 +100,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.json:json:20210307")
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
+
 }
