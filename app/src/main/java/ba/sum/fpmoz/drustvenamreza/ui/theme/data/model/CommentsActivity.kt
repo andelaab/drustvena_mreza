@@ -1,8 +1,8 @@
 package ba.sum.fpmoz.drustvenamreza.ui.theme.data.model
 
 import android.os.Bundle
-import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -24,13 +24,12 @@ class CommentsActivity : AppCompatActivity() {
     private val commentsList = mutableListOf<Comment>()
 
     private lateinit var editTextComment: EditText
-    private lateinit var buttonSend: Button
+    private lateinit var buttonSend: ImageButton   // <-- promijenjeno ovdje
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
     private val currentUserId = auth.currentUser?.uid ?: ""
 
-    // ID posta čije komentare prikazujemo, dobit će se iz intent-a
     private var postId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +37,6 @@ class CommentsActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_comments)
 
-        // Sakrij ActionBar (naslov aplikacije)
         supportActionBar?.hide()
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -55,8 +53,12 @@ class CommentsActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
-        // Dohvati postId iz intenta
         postId = intent.getStringExtra("postId")
+
+        val buttonBack = findViewById<ImageButton>(R.id.buttonBack)
+        buttonBack.setOnClickListener {
+            finish()
+        }
 
         loadComments()
 
@@ -105,14 +107,11 @@ class CommentsActivity : AppCompatActivity() {
             .collection("comments")
             .add(newComment)
             .addOnSuccessListener {
-                // Očisti polje za unos nakon slanja
                 editTextComment.text.clear()
-
-                // Ažuriraj broj komentara na postu
                 incrementCommentCount(postId)
             }
             .addOnFailureListener {
-                // Opcionalno: prikazati poruku o grešci korisniku
+                // opcionalno prikazati grešku
             }
     }
 
