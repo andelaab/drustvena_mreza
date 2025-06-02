@@ -80,6 +80,8 @@ dependencies {
 
     // Glide za učitavanje slika
     implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     kapt("com.github.bumptech.glide:compiler:4.15.1")
 
     // UI podrška

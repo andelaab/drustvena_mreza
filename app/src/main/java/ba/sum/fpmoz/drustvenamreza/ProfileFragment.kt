@@ -22,6 +22,8 @@ class ProfileFragment : Fragment() {
     private lateinit var interestsText: TextView
     private lateinit var likesCountText: TextView
     private lateinit var commentsCountText: TextView
+    private lateinit var followersCountText: TextView
+    private lateinit var followingCountText: TextView
 
     private lateinit var editProfileBtn: Button
     private lateinit var logoutBtn: Button
@@ -32,11 +34,9 @@ class ProfileFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
-        // Inicijalizacija Firebase-a
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        // Povezivanje UI elemenata
         profileImageView = view.findViewById(R.id.profileImageView)
         emailText = view.findViewById(R.id.profileEmail)
         fullNameText = view.findViewById(R.id.profileFullName)
@@ -44,23 +44,30 @@ class ProfileFragment : Fragment() {
         interestsText = view.findViewById(R.id.profileInterests)
         likesCountText = view.findViewById(R.id.likesCountText)
         commentsCountText = view.findViewById(R.id.commentsCountText)
+        followersCountText = view.findViewById(R.id.followersCountText)
+        followingCountText = view.findViewById(R.id.followingCountText)
         editProfileBtn = view.findViewById(R.id.btnEditProfile)
         logoutBtn = view.findViewById(R.id.btnLogout)
 
-        // Učitavanje podataka korisnika
-        loadUserData()
-
-        // Listener za uređivanje profila
         editProfileBtn.setOnClickListener {
-            val intent = Intent(requireContext(), EditProfileActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(requireContext(), EditProfileActivity::class.java))
         }
 
-        // Listener za odjavu
         logoutBtn.setOnClickListener {
             auth.signOut()
             startActivity(Intent(requireContext(), LoginActivity::class.java))
             requireActivity().finish()
+        }
+
+        followersCountText.setOnClickListener {
+            val userId = auth.currentUser?.uid
+            if (userId != null) {
+                val intent = Intent(requireContext(), FollowersListActivity::class.java)
+                intent.putExtra("userId", userId)
+                startActivity(intent)
+            } else {
+                Toast.makeText(requireContext(), "Greška: Korisnik nije prijavljen.", Toast.LENGTH_SHORT).show()
+            }
         }
 
         return view
@@ -68,30 +75,33 @@ class ProfileFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        // Osvježavanje podataka korisnika nakon povratka
         loadUserData()
     }
 
     private fun loadUserData() {
-        val user = auth.currentUser
-        if (user != null) {
-            emailText.text = user.email
+        val user = auth.currentUser ?: return
+        emailText.text = user.email ?: "Nepoznat email"
 
-            db.collection("users").document(user.uid).get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
-                        fullNameText.text = document.getString("fullName") ?: "Nema imena"
-                        bioText.text = document.getString("bio") ?: "Biografija nije dostupna"
-                        interestsText.text = document.getString("interests") ?: "Nema interesa"
-                        likesCountText.text = "Lajkova: ${document.getLong("likesCount") ?: 0}"
-                        commentsCountText.text = "Komentara: ${document.getLong("commentsCount") ?: 0}"
-                    } else {
-                        Toast.makeText(requireContext(), "Korisnički podaci nisu pronađeni.", Toast.LENGTH_SHORT).show()
-                    }
+        db.collection("users").document(user.uid).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    fullNameText.text = document.getString("fullName") ?: "Nepoznato ime"
+                    bioText.text = document.getString("bio") ?: "Biografija nije dostupna"
+                    interestsText.text = document.getString("interests") ?: "Nema interesa"
+                    likesCountText.text = "Lajkova: ${document.getLong("likesCount") ?: 0}"
+                    commentsCountText.text = "Komentara: ${document.getLong("commentsCount") ?: 0}"
+
+                    val followersMap = document.get("followers") as? Map<*, *>
+                    val followingMap = document.get("following") as? Map<*, *>
+                    followersCountText.text = "Pratitelji: ${followersMap?.size ?: 0}"
+                    followingCountText.text = "Prati: ${followingMap?.size ?: 0}"
+
+                } else {
+                    Toast.makeText(requireContext(), "Korisnički dokument ne postoji.", Toast.LENGTH_SHORT).show()
                 }
-                .addOnFailureListener { exception ->
-                    Toast.makeText(requireContext(), "Greška: ${exception.message}", Toast.LENGTH_SHORT).show()
-                }
-        }
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Greška pri dohvaćanju korisničkih podataka.", Toast.LENGTH_SHORT).show()
+            }
     }
 }

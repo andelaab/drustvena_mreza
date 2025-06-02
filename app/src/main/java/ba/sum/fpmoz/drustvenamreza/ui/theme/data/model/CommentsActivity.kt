@@ -82,14 +82,35 @@ class CommentsActivity : AppCompatActivity() {
 
                 if (snapshot != null) {
                     commentsList.clear()
-                    for (doc in snapshot.documents) {
-                        val comment = doc.toObject(Comment::class.java)
-                        if (comment != null) {
-                            commentsList.add(comment.copy(commentId = doc.id))
-                        }
+                    val docs = snapshot.documents
+                    if (docs.isEmpty()) {
+                        adapter.notifyDataSetChanged()
+                        return@addSnapshotListener
                     }
-                    adapter.notifyDataSetChanged()
-                    recyclerView.scrollToPosition(commentsList.size - 1)
+                    val userIds = docs.mapNotNull { it.getString("userId") }.toSet()
+                    firestore.collection("users")
+                        .whereIn("uid", userIds.toList())
+                        .get()
+                        .addOnSuccessListener { usersSnapshot ->
+                            val userMap = usersSnapshot.documents.associateBy(
+                                { it.getString("uid") ?: "" },
+                                { it.getString("fullName") ?: "Nepoznato ime" }
+                            )
+                            for (doc in docs) {
+                                val comment = doc.toObject(Comment::class.java)
+                                if (comment != null) {
+                                    val fullName = userMap[comment.userId] ?: "Nepoznato ime"
+                                    commentsList.add(
+                                        comment.copy(
+                                            commentId = doc.id,
+                                            userFullName = fullName
+                                        )
+                                    )
+                                }
+                            }
+                            adapter.notifyDataSetChanged()
+                            recyclerView.scrollToPosition(commentsList.size - 1)
+                        }
                 }
             }
     }

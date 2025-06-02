@@ -3,10 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradient_background"
-    android:padding="24dp">
+    android:padding="24dp"
+    android:background="@drawable/gradient_background">
 
-    <!-- Profile Image -->
     <ImageView
         android:id="@+id/profileImageView"
         android:layout_width="100dp"
@@ -16,11 +15,10 @@
         android:background="@drawable/circle_background"
         android:padding="4dp"
         app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="32dp" />
 
-    <!-- Full Name -->
     <TextView
         android:id="@+id/profileFullName"
         android:layout_width="wrap_content"
@@ -30,13 +28,11 @@
         android:textStyle="bold"
         android:textColor="@android:color/white"
         app:layout_constraintTop_toBottomOf="@id/profileImageView"
-        android:layout_marginTop="16dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="16dp" />
 
-    <!-- Email, Bio, Interests -->
     <LinearLayout
-        android:id="@+id/infoBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
@@ -74,20 +70,25 @@
             android:layout_marginTop="4dp" />
 
         <TextView
-            android:id="@+id/likesCountText"
+            android:id="@+id/followersCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lajkova: 0"
+            android:text="Pratitelji: 0"
             android:textColor="@android:color/white"
-            android:layout_marginTop="8dp" />
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:clickable="true"
+            android:focusable="true" />
 
-        <TextView
-            android:id="@+id/commentsCountText"
-            android:layout_width="wrap_content"
+        <Button
+            android:id="@+id/followToggleButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Komentara: 0"
-            android:textColor="@android:color/white" />
+            android:text="Prati"
+            android:textAllCaps="false"
+            android:backgroundTint="#FF9800"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="12dp" />
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

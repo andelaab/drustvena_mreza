@@ -17,9 +17,6 @@
             android:name=".ui.theme.data.model.CommentsActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.theme.data.model.MainActivity"
-            android:exported="false" />
-        <activity
             android:name=".ui.theme.data.AddPostActivity"
             android:exported="false" />
         <activity

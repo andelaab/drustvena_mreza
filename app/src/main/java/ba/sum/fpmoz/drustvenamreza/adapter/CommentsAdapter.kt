@@ -24,7 +24,7 @@ class CommentsAdapter(
 
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = comments[position]
-        holder.userIdTextView.text = comment.userId  // ili prikaži korisničko ime ako ga imaš
+        holder.userIdTextView.text = comment.userFullName // ili prikaži korisničko ime ako ga imaš
         holder.contentTextView.text = comment.content
     }
 
