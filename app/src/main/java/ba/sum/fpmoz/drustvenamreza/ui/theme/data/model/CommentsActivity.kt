@@ -24,7 +24,7 @@ class CommentsActivity : AppCompatActivity() {
     private val commentsList = mutableListOf<Comment>()
 
     private lateinit var editTextComment: EditText
-    private lateinit var buttonSend: ImageButton   // <-- promijenjeno ovdje
+    private lateinit var buttonSend: ImageButton
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -116,23 +116,35 @@ class CommentsActivity : AppCompatActivity() {
     }
 
     private fun sendComment(postId: String, content: String) {
-        val newComment = Comment(
-            commentId = "",
-            userId = currentUserId,
-            content = content,
-            timestamp = System.currentTimeMillis()
-        )
+        if (currentUserId.isEmpty()) return // sigurnosna provjera
 
-        firestore.collection("posts")
-            .document(postId)
-            .collection("comments")
-            .add(newComment)
-            .addOnSuccessListener {
-                editTextComment.text.clear()
-                incrementCommentCount(postId)
+        // prvo dohvat fullName trenutnog korisnika
+        firestore.collection("users").document(currentUserId).get()
+            .addOnSuccessListener { document ->
+                val fullName = document.getString("fullName") ?: "Nepoznato ime"
+
+                val newComment = Comment(
+                    commentId = "",           // može ostati prazno, Firestore će dati ID
+                    userId = currentUserId,
+                    userFullName = fullName,  // sad postavljaš pravo ime
+                    content = content,
+                    timestamp = System.currentTimeMillis()
+                )
+
+                firestore.collection("posts")
+                    .document(postId)
+                    .collection("comments")
+                    .add(newComment)
+                    .addOnSuccessListener {
+                        editTextComment.text.clear()
+                        incrementCommentCount(postId)
+                    }
+                    .addOnFailureListener {
+                        // opcionalno prikazati grešku
+                    }
             }
             .addOnFailureListener {
-                // opcionalno prikazati grešku
+                // opcionalno prikazati grešku kod dohvata korisnika
             }
     }
 

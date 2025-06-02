@@ -1,5 +1,4 @@
 package ba.sum.fpmoz.drustvenamreza.model
-
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.IgnoreExtraProperties
 
