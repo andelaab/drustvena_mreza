@@ -20,8 +20,6 @@ class ProfileFragment : Fragment() {
     private lateinit var fullNameText: TextView
     private lateinit var bioText: TextView
     private lateinit var interestsText: TextView
-    private lateinit var likesCountText: TextView
-    private lateinit var commentsCountText: TextView
     private lateinit var followersCountText: TextView
     private lateinit var followingCountText: TextView
 
@@ -42,8 +40,6 @@ class ProfileFragment : Fragment() {
         fullNameText = view.findViewById(R.id.profileFullName)
         bioText = view.findViewById(R.id.profileBio)
         interestsText = view.findViewById(R.id.profileInterests)
-        likesCountText = view.findViewById(R.id.likesCountText)
-        commentsCountText = view.findViewById(R.id.commentsCountText)
         followersCountText = view.findViewById(R.id.followersCountText)
         followingCountText = view.findViewById(R.id.followingCountText)
         editProfileBtn = view.findViewById(R.id.btnEditProfile)
@@ -88,14 +84,11 @@ class ProfileFragment : Fragment() {
                     fullNameText.text = document.getString("fullName") ?: "Nepoznato ime"
                     bioText.text = document.getString("bio") ?: "Biografija nije dostupna"
                     interestsText.text = document.getString("interests") ?: "Nema interesa"
-                    likesCountText.text = "Lajkova: ${document.getLong("likesCount") ?: 0}"
-                    commentsCountText.text = "Komentara: ${document.getLong("commentsCount") ?: 0}"
 
                     val followersMap = document.get("followers") as? Map<*, *>
                     val followingMap = document.get("following") as? Map<*, *>
                     followersCountText.text = "Pratitelji: ${followersMap?.size ?: 0}"
                     followingCountText.text = "Prati: ${followingMap?.size ?: 0}"
-
                 } else {
                     Toast.makeText(requireContext(), "Korisnički dokument ne postoji.", Toast.LENGTH_SHORT).show()
                 }
