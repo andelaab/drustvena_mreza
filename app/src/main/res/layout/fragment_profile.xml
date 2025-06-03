@@ -74,24 +74,6 @@
             android:layout_marginTop="4dp" />
 
         <TextView
-            android:id="@+id/likesCountText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Lajkova: 0"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:id="@+id/commentsCountText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Komentara: 0"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
-
-        <!-- ✅ OVO JE NOVO - Pratitelji -->
-        <TextView
             android:id="@+id/followersCountText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -102,7 +84,6 @@
             android:clickable="true"
             android:focusable="true" />
 
-        <!-- ✅ OVO JE NOVO - Prati -->
         <TextView
             android:id="@+id/followingCountText"
             android:layout_width="wrap_content"

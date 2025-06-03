@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">DrustvenaMreza</string>
+    <string name="app_name">Hobbies</string>
     <string name="title_activity_login_screen">LoginScreen</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>
