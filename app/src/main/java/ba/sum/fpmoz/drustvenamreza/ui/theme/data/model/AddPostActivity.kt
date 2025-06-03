@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import ba.sum.fpmoz.drustvenamreza.R
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -28,10 +29,14 @@ class AddPostActivity : AppCompatActivity() {
 
     private val PICK_IMAGE_REQUEST = 1001
 
-    // OVDJE STAVI SVOJ ImageKit public API key
+    // OVDJE STAVI SVOJ ImageKit private API key
     private val imageKitPrivateKey = "private_iXm5gCe9WCLcnqWkMMIyRbo4usw="
 
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -105,7 +110,7 @@ class AddPostActivity : AppCompatActivity() {
             .addFormDataPart("fileName", "post_${System.currentTimeMillis()}.jpg")
             .build()
 
-        val credential = Credentials.basic(imageKitPrivateKey, "") // Basic Auth zaglavlje
+        val credential = Credentials.basic(imageKitPrivateKey, "")
 
         val request = Request.Builder()
             .url(uploadUrl)
@@ -116,7 +121,7 @@ class AddPostActivity : AppCompatActivity() {
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
                 runOnUiThread {
-                    Toast.makeText(this@AddPostActivity, "Neuspješan upload slike", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@AddPostActivity, "Greška upload slike: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -126,7 +131,7 @@ class AddPostActivity : AppCompatActivity() {
 
                 if (!response.isSuccessful) {
                     runOnUiThread {
-                        Toast.makeText(this@AddPostActivity, "Greška pri uploadu slike", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AddPostActivity, "ImageKit greška: $responseBody", Toast.LENGTH_LONG).show()
                     }
                     return
                 }
@@ -139,30 +144,37 @@ class AddPostActivity : AppCompatActivity() {
                     }
                 } catch (e: Exception) {
                     runOnUiThread {
-                        Toast.makeText(this@AddPostActivity, "Greška u odgovoru servera", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@AddPostActivity, "Greška u odgovoru servera: ${e.message}", Toast.LENGTH_LONG).show()
                     }
                 }
             }
         })
     }
 
-
     private fun savePostToFirestore(description: String, imageUrl: String?) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "Morate biti prijavljeni za objavu.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val post = hashMapOf(
             "content" to description,
             "timestamp" to Timestamp.now(),
             "imageUrl" to imageUrl,
-            "likes" to hashMapOf<String, Boolean>()
+            "likes" to hashMapOf<String, Boolean>(),
+            "userId" to currentUser.uid.trim(),
+            "userName" to currentUser.displayName
         )
 
-        db.collection("posts")  // preporučujem "posts" a ne "pogit addsts"
+        db.collection("posts")
             .add(post)
             .addOnSuccessListener {
                 Toast.makeText(this, "Objava uspješno dodana", Toast.LENGTH_SHORT).show()
                 finish()
             }
-            .addOnFailureListener {
-                Toast.makeText(this, "Greška pri dodavanju objave", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Greška pri dodavanju objave: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
