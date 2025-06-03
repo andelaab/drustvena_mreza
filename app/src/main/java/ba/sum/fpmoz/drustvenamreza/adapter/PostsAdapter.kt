@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.PopupMenu
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -14,7 +15,8 @@ import com.google.firebase.auth.FirebaseAuth
 class PostsAdapter(
     private val posts: List<Post>,
     private val onLikeClicked: (Post) -> Unit,
-    private val onCommentClicked: (Post) -> Unit
+    private val onCommentClicked: (Post) -> Unit,
+    private val onDeleteClicked: (Post) -> Unit // NOVO
 ) : RecyclerView.Adapter<PostsAdapter.PostViewHolder>() {
 
     inner class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -25,6 +27,7 @@ class PostsAdapter(
         val likeCountText: TextView = itemView.findViewById(R.id.likeCount)
         val commentIcon: ImageView = itemView.findViewById(R.id.commentIcon)
         val commentCountText: TextView = itemView.findViewById(R.id.commentCount)
+        val postOptions: ImageView = itemView.findViewById(R.id.postOptions)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -39,7 +42,6 @@ class PostsAdapter(
         holder.likeCountText.text = "Lajkova: ${post.likes?.size ?: 0}"
         holder.commentCountText.text = "Komentara: ${post.commentCount ?: 0}"
 
-        // Prikaz opisa objave ili sakri ako nema
         if (!post.content.isNullOrBlank()) {
             holder.postDescription.visibility = View.VISIBLE
             holder.postDescription.text = post.content
@@ -47,8 +49,6 @@ class PostsAdapter(
             holder.postDescription.visibility = View.GONE
         }
 
-
-        // Prikaz slike ili sakri ako nema
         if (!post.imageUrl.isNullOrBlank()) {
             holder.imageView.visibility = View.VISIBLE
             Glide.with(holder.imageView.context)
@@ -63,9 +63,9 @@ class PostsAdapter(
         val likedByUser = post.likes?.containsKey(currentUserId) == true
 
         if (likedByUser) {
-            holder.likeIcon.setImageResource(R.drawable.ic_like) // popunjeno srce
+            holder.likeIcon.setImageResource(R.drawable.ic_like)
         } else {
-            holder.likeIcon.setImageResource(R.drawable.ic_like_outline) // obrub srca
+            holder.likeIcon.setImageResource(R.drawable.ic_like_outline)
         }
 
         holder.likeIcon.setOnClickListener {
@@ -74,6 +74,24 @@ class PostsAdapter(
 
         holder.commentIcon.setOnClickListener {
             onCommentClicked(post)
+        }
+
+        // Prikaz tri točkice samo za svoje objave
+        if (post.userId == currentUserId) {
+            holder.postOptions.visibility = View.VISIBLE
+            holder.postOptions.setOnClickListener { view ->
+                val popup = PopupMenu(view.context, view)
+                popup.menuInflater.inflate(R.menu.menu_post_options, popup.menu)
+                popup.setOnMenuItemClickListener { item ->
+                    if (item.itemId == R.id.action_delete_post) {
+                        onDeleteClicked(post)
+                        true
+                    } else false
+                }
+                popup.show()
+            }
+        } else {
+            holder.postOptions.visibility = View.GONE
         }
     }
 

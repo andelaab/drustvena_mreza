@@ -12,12 +12,12 @@ import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.adapter.PostsAdapter
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import ba.sum.fpmoz.drustvenamreza.ui.theme.data.AddPostActivity
-import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.CommentsActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.SetOptions
+import android.widget.Toast
 
 class PostsFragment : Fragment() {
 
@@ -40,7 +40,8 @@ class PostsFragment : Fragment() {
         adapter = PostsAdapter(
             postsList,
             onLikeClicked = { post -> toggleLike(post) },
-            onCommentClicked = { post -> openComments(post) }
+            onCommentClicked = { post -> openComments(post) },
+            onDeleteClicked = { post -> deletePost(post) } // NOVO
         )
         recyclerView.adapter = adapter
 
@@ -95,11 +96,7 @@ class PostsFragment : Fragment() {
         if (likes.isEmpty()) {
             docRef.update("likes", FieldValue.delete())
                 .addOnSuccessListener {
-                    println("Likes polje obrisano (jer je prazno).")
                     updateLocalPostLikes(post, null)
-                }
-                .addOnFailureListener { e ->
-                    println("Greška pri brisanju likes polja: ${e.message}")
                 }
         } else {
             val filteredLikes = likes.filterKeys { it.isNotBlank() && it != "null" }
@@ -107,20 +104,12 @@ class PostsFragment : Fragment() {
             if (filteredLikes.isNotEmpty()) {
                 docRef.set(mapOf("likes" to filteredLikes), SetOptions.merge())
                     .addOnSuccessListener {
-                        println("Likes polje uspješno ažurirano.")
                         updateLocalPostLikes(post, filteredLikes)
-                    }
-                    .addOnFailureListener { e ->
-                        println("Greška pri ažuriranju likes polja: ${e.message}")
                     }
             } else {
                 docRef.update("likes", FieldValue.delete())
                     .addOnSuccessListener {
-                        println("Likes polje obrisano jer nema validnih korisnika.")
                         updateLocalPostLikes(post, null)
-                    }
-                    .addOnFailureListener { e ->
-                        println("Greška pri brisanju likes polja: ${e.message}")
                     }
             }
         }
@@ -139,5 +128,27 @@ class PostsFragment : Fragment() {
         val intent = Intent(requireContext(), CommentsActivity::class.java)
         intent.putExtra("postId", post.id)
         startActivity(intent)
+    }
+
+    // NOVO: Brisanje objave i komentara
+    private fun deletePost(post: Post) {
+        val postId = post.id ?: return
+        val postRef = firestore.collection("posts").document(postId)
+        // Prvo obriši sve komentare
+        firestore.collection("posts").document(postId).collection("comments")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val batch = firestore.batch()
+                for (doc in snapshot.documents) {
+                    batch.delete(doc.reference)
+                }
+                // Obriši i samu objavu
+                batch.delete(postRef)
+                batch.commit().addOnSuccessListener {
+                    postsList.removeAll { it.id == postId }
+                    adapter.notifyDataSetChanged()
+                    Toast.makeText(requireContext(), "Objava obrisana", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 }

@@ -13,6 +13,7 @@ import ba.sum.fpmoz.drustvenamreza.R
 import ba.sum.fpmoz.drustvenamreza.adapter.CommentsAdapter
 import ba.sum.fpmoz.drustvenamreza.model.Comment
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
@@ -88,12 +89,16 @@ class CommentsActivity : AppCompatActivity() {
                         return@addSnapshotListener
                     }
                     val userIds = docs.mapNotNull { it.getString("userId") }.toSet()
+                    if (userIds.isEmpty()) {
+                        adapter.notifyDataSetChanged()
+                        return@addSnapshotListener
+                    }
                     firestore.collection("users")
-                        .whereIn("uid", userIds.toList())
+                        .whereIn(FieldPath.documentId(), userIds.toList())
                         .get()
                         .addOnSuccessListener { usersSnapshot ->
                             val userMap = usersSnapshot.documents.associateBy(
-                                { it.getString("uid") ?: "" },
+                                { it.id }, // ID dokumenta je uid korisnika
                                 { it.getString("fullName") ?: "Nepoznato ime" }
                             )
                             for (doc in docs) {
