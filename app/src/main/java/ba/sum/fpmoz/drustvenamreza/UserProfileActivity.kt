@@ -5,12 +5,19 @@ import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import ba.sum.fpmoz.drustvenamreza.adapter.UserPostsAdapter
 import ba.sum.fpmoz.drustvenamreza.manager.FollowManager
+import ba.sum.fpmoz.drustvenamreza.model.Post
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -23,8 +30,16 @@ class UserProfileActivity : AppCompatActivity() {
     private lateinit var followersCountTextView: TextView
     private lateinit var bioTextView: TextView
     private lateinit var interestsTextView: TextView
+    private lateinit var fullNameTextView: TextView
+    private lateinit var emailTextView: TextView
+    private lateinit var profileImageView: ImageView
     private var isFollowing = false
     private lateinit var targetUserId: String
+
+    // Objave
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var postsAdapter: UserPostsAdapter
+    private val postsList = mutableListOf<Post>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,19 +59,26 @@ class UserProfileActivity : AppCompatActivity() {
 
         Log.d("UserProfileActivity", "Primljeno: $targetUserId, $fullName, $email")
 
-        val fullNameTextView: TextView = findViewById(R.id.profileFullName)
-        val emailTextView: TextView = findViewById(R.id.profileEmail)
+        fullNameTextView = findViewById(R.id.profileFullName)
+        emailTextView = findViewById(R.id.profileEmail)
         followersCountTextView = findViewById(R.id.followersCountText)
         followToggleButton = findViewById(R.id.followToggleButton)
         bioTextView = findViewById(R.id.profileBio)
         interestsTextView = findViewById(R.id.profileInterests)
+        profileImageView = findViewById(R.id.profileImageView)
 
         fullNameTextView.text = fullName ?: "Nepoznato ime"
         emailTextView.text = email ?: "Nepoznat email"
 
+        recyclerView = findViewById(R.id.recyclerUserPosts)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        postsAdapter = UserPostsAdapter(postsList)
+        recyclerView.adapter = postsAdapter
+
         loadUserProfileData()
         loadFollowersCount()
         updateFollowButtonState()
+        loadUserPosts(targetUserId)
 
         followersCountTextView.setOnClickListener {
             val intent = Intent(this, FollowersListActivity::class.java)
@@ -92,8 +114,23 @@ class UserProfileActivity : AppCompatActivity() {
             .addOnSuccessListener { doc ->
                 val bio = doc.getString("bio") ?: "Biografija nije dostupna"
                 val interests = doc.getString("interests") ?: "Nema interesa"
+                val fullName = doc.getString("fullName") ?: "Nepoznato ime"
+                val email = doc.getString("email") ?: "Nepoznat email"
+                val imageUrl = doc.getString("profileImageUrl")
+
                 bioTextView.text = bio
                 interestsTextView.text = interests
+                fullNameTextView.text = fullName
+                emailTextView.text = email
+
+                if (!imageUrl.isNullOrBlank()) {
+                    Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_person)
+                        .into(profileImageView)
+                } else {
+                    profileImageView.setImageResource(R.drawable.ic_person)
+                }
             }
             .addOnFailureListener {
                 bioTextView.text = "Biografija nije dostupna"
@@ -124,6 +161,23 @@ class UserProfileActivity : AppCompatActivity() {
 
     private fun updateButtonUI() {
         followToggleButton.text = if (isFollowing) "Otprati" else "Prati"
+    }
+
+    private fun loadUserPosts(userId: String) {
+        db.collection("posts")
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                postsList.clear()
+                for (doc in snapshot.documents) {
+                    val post = doc.toObject(Post::class.java)
+                    if (post != null) {
+                        postsList.add(post.copy(id = doc.id))
+                    }
+                }
+                postsAdapter.notifyDataSetChanged()
+            }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

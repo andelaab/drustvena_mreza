@@ -7,8 +7,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import ba.sum.fpmoz.drustvenamreza.adapter.UserPostsAdapter
+import ba.sum.fpmoz.drustvenamreza.model.Post
+import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 
 class ProfileFragment : Fragment() {
 
@@ -25,6 +31,11 @@ class ProfileFragment : Fragment() {
 
     private lateinit var editProfileBtn: Button
     private lateinit var logoutBtn: Button
+
+    // Posts
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var postsAdapter: UserPostsAdapter
+    private val postsList = mutableListOf<Post>()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -45,13 +56,21 @@ class ProfileFragment : Fragment() {
         editProfileBtn = view.findViewById(R.id.btnEditProfile)
         logoutBtn = view.findViewById(R.id.btnLogout)
 
+        recyclerView = view.findViewById(R.id.recyclerUserPosts)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        postsAdapter = UserPostsAdapter(postsList)
+        recyclerView.adapter = postsAdapter
+
         editProfileBtn.setOnClickListener {
-            startActivity(Intent(requireContext(), EditProfileActivity::class.java))
+            val intent = Intent(requireContext(), EditProfileActivity::class.java)
+            startActivity(intent)
         }
 
         logoutBtn.setOnClickListener {
             auth.signOut()
-            startActivity(Intent(requireContext(), LoginActivity::class.java))
+            val intent = Intent(requireContext(), LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             requireActivity().finish()
         }
 
@@ -61,8 +80,15 @@ class ProfileFragment : Fragment() {
                 val intent = Intent(requireContext(), FollowersListActivity::class.java)
                 intent.putExtra("userId", userId)
                 startActivity(intent)
-            } else {
-                Toast.makeText(requireContext(), "Greška: Korisnik nije prijavljen.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        followingCountText.setOnClickListener {
+            val userId = auth.currentUser?.uid
+            if (userId != null) {
+                val intent = Intent(requireContext(), FollowingListActivity::class.java)
+                intent.putExtra("userId", userId)
+                startActivity(intent)
             }
         }
 
@@ -79,22 +105,54 @@ class ProfileFragment : Fragment() {
         emailText.text = user.email ?: "Nepoznat email"
 
         db.collection("users").document(user.uid).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    fullNameText.text = document.getString("fullName") ?: "Nepoznato ime"
-                    bioText.text = document.getString("bio") ?: "Biografija nije dostupna"
-                    interestsText.text = document.getString("interests") ?: "Nema interesa"
+            .addOnSuccessListener { doc ->
+                fullNameText.text = doc.getString("fullName") ?: "Nepoznato ime"
+                bioText.text = doc.getString("bio") ?: "Biografija nije dostupna"
+                interestsText.text = doc.getString("interests") ?: "Nema interesa"
 
-                    val followersMap = document.get("followers") as? Map<*, *>
-                    val followingMap = document.get("following") as? Map<*, *>
-                    followersCountText.text = "Pratitelji: ${followersMap?.size ?: 0}"
-                    followingCountText.text = "Prati: ${followingMap?.size ?: 0}"
+                // Profile image (ako postoji)
+                val imageUrl = doc.getString("profileImageUrl")
+                if (!imageUrl.isNullOrBlank()) {
+                    Glide.with(this)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.ic_person)
+                        .into(profileImageView)
                 } else {
-                    Toast.makeText(requireContext(), "Korisnički dokument ne postoji.", Toast.LENGTH_SHORT).show()
+                    profileImageView.setImageResource(R.drawable.ic_person)
                 }
+
+                // Followers & following count
+                val followers = doc.get("followers") as? Map<*, *>
+                val following = doc.get("following") as? Map<*, *>
+                followersCountText.text = "Pratitelji: ${followers?.size ?: 0}"
+                followingCountText.text = "Prati: ${following?.size ?: 0}"
+
+                // Load posts for this user
+                loadUserPosts(user.uid)
             }
             .addOnFailureListener {
-                Toast.makeText(requireContext(), "Greška pri dohvaćanju korisničkih podataka.", Toast.LENGTH_SHORT).show()
+                fullNameText.text = "Nepoznato ime"
+                bioText.text = "Biografija nije dostupna"
+                interestsText.text = "Nema interesa"
+                followersCountText.text = "Pratitelji: 0"
+                followingCountText.text = "Prati: 0"
+            }
+    }
+
+    private fun loadUserPosts(userId: String) {
+        db.collection("posts")
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                postsList.clear()
+                for (doc in snapshot.documents) {
+                    val post = doc.toObject(Post::class.java)
+                    if (post != null) {
+                        postsList.add(post.copy(id = doc.id))
+                    }
+                }
+                postsAdapter.notifyDataSetChanged()
             }
     }
 }
