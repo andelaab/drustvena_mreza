@@ -13,8 +13,11 @@ import ba.sum.fpmoz.drustvenamreza.adapter.UserPostsAdapter
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.CommentsActivity
 
 class ProfileFragment : Fragment() {
 
@@ -32,7 +35,6 @@ class ProfileFragment : Fragment() {
     private lateinit var editProfileBtn: Button
     private lateinit var logoutBtn: Button
 
-    // Posts
     private lateinit var recyclerView: RecyclerView
     private lateinit var postsAdapter: UserPostsAdapter
     private val postsList = mutableListOf<Post>()
@@ -58,7 +60,11 @@ class ProfileFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.recyclerUserPosts)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        postsAdapter = UserPostsAdapter(postsList)
+        postsAdapter = UserPostsAdapter(
+            postsList,
+            onLikeClicked = { post -> toggleLike(post) },
+            onCommentClicked = { post -> openComments(post) }
+        )
         recyclerView.adapter = postsAdapter
 
         editProfileBtn.setOnClickListener {
@@ -110,7 +116,6 @@ class ProfileFragment : Fragment() {
                 bioText.text = doc.getString("bio") ?: "Biografija nije dostupna"
                 interestsText.text = doc.getString("interests") ?: "Nema interesa"
 
-                // Profile image (ako postoji)
                 val imageUrl = doc.getString("profileImageUrl")
                 if (!imageUrl.isNullOrBlank()) {
                     Glide.with(this)
@@ -121,13 +126,11 @@ class ProfileFragment : Fragment() {
                     profileImageView.setImageResource(R.drawable.ic_person)
                 }
 
-                // Followers & following count
                 val followers = doc.get("followers") as? Map<*, *>
                 val following = doc.get("following") as? Map<*, *>
                 followersCountText.text = "Pratitelji: ${followers?.size ?: 0}"
                 followingCountText.text = "Prati: ${following?.size ?: 0}"
 
-                // Load posts for this user
                 loadUserPosts(user.uid)
             }
             .addOnFailureListener {
@@ -154,5 +157,29 @@ class ProfileFragment : Fragment() {
                 }
                 postsAdapter.notifyDataSetChanged()
             }
+    }
+
+    private fun toggleLike(post: Post) {
+        val docRef = db.collection("posts").document(post.id ?: return)
+        val currentUserId = auth.currentUser?.uid ?: return
+        val likes = post.likes?.toMutableMap() ?: mutableMapOf()
+
+        if (likes.containsKey(currentUserId)) {
+            likes.remove(currentUserId)
+        } else {
+            likes[currentUserId] = true
+        }
+
+        if (likes.isEmpty()) {
+            docRef.update("likes", FieldValue.delete())
+        } else {
+            docRef.set(mapOf("likes" to likes), SetOptions.merge())
+        }
+    }
+
+    private fun openComments(post: Post) {
+        val intent = Intent(requireContext(), CommentsActivity::class.java)
+        intent.putExtra("postId", post.id)
+        startActivity(intent)
     }
 }

@@ -16,8 +16,11 @@ import ba.sum.fpmoz.drustvenamreza.manager.FollowManager
 import ba.sum.fpmoz.drustvenamreza.model.Post
 import com.bumptech.glide.Glide
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.SetOptions
+import ba.sum.fpmoz.drustvenamreza.ui.theme.data.model.CommentsActivity
 
 class UserProfileActivity : AppCompatActivity() {
 
@@ -36,7 +39,6 @@ class UserProfileActivity : AppCompatActivity() {
     private var isFollowing = false
     private lateinit var targetUserId: String
 
-    // Objave
     private lateinit var recyclerView: RecyclerView
     private lateinit var postsAdapter: UserPostsAdapter
     private val postsList = mutableListOf<Post>()
@@ -72,7 +74,11 @@ class UserProfileActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recyclerUserPosts)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        postsAdapter = UserPostsAdapter(postsList)
+        postsAdapter = UserPostsAdapter(
+            postsList,
+            onLikeClicked = { post -> toggleLike(post) },
+            onCommentClicked = { post -> openComments(post) }
+        )
         recyclerView.adapter = postsAdapter
 
         loadUserProfileData()
@@ -178,6 +184,29 @@ class UserProfileActivity : AppCompatActivity() {
                 }
                 postsAdapter.notifyDataSetChanged()
             }
+    }
+
+    private fun toggleLike(post: Post) {
+        val docRef = db.collection("posts").document(post.id ?: return)
+        val likes = post.likes?.toMutableMap() ?: mutableMapOf()
+
+        if (likes.containsKey(currentUserId)) {
+            likes.remove(currentUserId)
+        } else {
+            likes[currentUserId] = true
+        }
+
+        if (likes.isEmpty()) {
+            docRef.update("likes", FieldValue.delete())
+        } else {
+            docRef.set(mapOf("likes" to likes), SetOptions.merge())
+        }
+    }
+
+    private fun openComments(post: Post) {
+        val intent = Intent(this, CommentsActivity::class.java)
+        intent.putExtra("postId", post.id)
+        startActivity(intent)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
